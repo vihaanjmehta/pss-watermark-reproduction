@@ -87,6 +87,40 @@ Figures: `figures/window_size_sensitivity.png`, `figures/signal_strength_sensiti
 plus `figures/local_signal_example.png` and `figures/pss_example.png` from
 `src/visualize_example.py`.
 
+### Interpretation
+
+Two directional observations stand out:
+
+1. **Window size drives discriminability.** AUC rises monotonically with window
+   size (0.93 at 5, saturating near 1.0 from 20 up). Larger windows average out
+   the Bernoulli noise in each window's count, so the local z-score separates
+   signal from background more cleanly. At `window = 5` the detector is noisy —
+   the max-over-windows statistic is vulnerable to single-window spikes.
+2. **There is a clear signal-strength threshold.** At `0.40`, the signal is only
+   ~1.5 z-units above background and detection is weak (AUC 0.79); from `0.60`
+   upward detection saturates. This matches the expectation that stability-based
+   detection needs the local evidence to clear a detectability floor.
+
+**Caveat on the magnitude of these AUCs.** Near-1.0 values are expected in this
+controlled design and should be read as *within-model separability*, not as
+realistic detection performance. The simulator hands the detector several
+advantages a real system lacks: it knows the exact null rate `gamma = 0.25`,
+the signal region is at a fixed, known location with fixed length, the Bernoulli
+bits have no text-like autocorrelation, and the "adversary" is random bit flips
+rather than an adaptive paraphraser that could try to erode the stability signal.
+For this reason the *direction* of the two trends is the useful takeaway, not
+the absolute AUC values.
+
+## Key Finding
+
+In the synthetic setting, detection performance increased with window size,
+while weaker watermark-like signals produced substantially lower AUC. This
+suggests that the amount of local context can strongly influence stability-based
+detection, motivating further investigation under more realistic text and
+paraphrasing conditions. Because the setup is idealized (known null rate, fixed
+signal region, random-flip perturbations), these are directional findings about
+the PSS concept, not claims about real-world watermark detection rates.
+
 ## Limitations
 
 * The "documents" are **synthetic binary sequences**, not machine-generated
@@ -112,6 +146,6 @@ python3 src/visualize_example.py  # writes the local-signal and PSS example figu
 
 ## Reference
 
-Zhiyuan Wang, et al., *"Toward Resilient Watermark Detection: Stability-Aware
-Statistical Features for Machine-Generated Text."*
-OpenReview: https://openreview.net/forum?id=lIr8kHs8gI
+Sina Mansouri, Mohit Marvania, and Abolfazl Safikhani, *"Toward Resilient
+Watermark Detection: Stability-Aware Statistical Features for Machine-Generated
+Text."* OpenReview: https://openreview.net/forum?id=lIr8kHs8gI
